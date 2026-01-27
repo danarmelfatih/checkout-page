@@ -632,3 +632,44 @@ body {
     font-size: 24px;
   }
 }
+
+/* ================= RESPONSIVE DESIGN ================= */
+
+/* Tablet */
+@media (max-width: 992px) {
+  .checkout-container {
+    flex-direction: column;
+  }
+
+  .left-column,
+  .right-column {
+    width: 100%;
+  }
+}
+
+/* HP */
+@media (max-width: 576px) {
+  body {
+    padding: 10px;
+  }
+
+  .checkout-container {
+    padding: 15px;
+  }
+
+  h1, h2 {
+    font-size: 18px;
+  }
+
+  input, select, button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .payment-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+

@@ -1,4 +1,4 @@
-// Character counters
+// Penghitung jumlah karakter
 document.getElementById('name')?.addEventListener('input', function(e) {
   document.getElementById('nameCount').textContent = e.target.value.length;
 });
@@ -11,21 +11,21 @@ document.getElementById('phone')?.addEventListener('input', function(e) {
   document.getElementById('phoneCount').textContent = e.target.value.length;
 });
 
-// Validation functions
+// Fungsi validasi
 function validateEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
 
 function validatePassword(password) {
-  // 12 karakter, harus ada huruf dan angka
+  // 12 karakter, wajib mengandung huruf dan angka
   const hasLetter = /[a-zA-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   return password.length === 12 && hasLetter && hasNumber;
 }
 
 function validatePhone(phone) {
-  // 13 digit, dimulai dengan 628
+  // 13 digit angka, harus diawali 628
   const re = /^628[0-9]{10}$/;
   return re.test(phone);
 }
@@ -44,7 +44,7 @@ function hideError(fieldName) {
   }
 }
 
-// Real-time validation
+// Validasi langsung saat user selesai mengisi (real-time)
 document.getElementById('email')?.addEventListener('blur', function(e) {
   if (e.target.value && !validateEmail(e.target.value)) {
     showError('email');
@@ -69,7 +69,7 @@ document.getElementById('phone')?.addEventListener('blur', function(e) {
   }
 });
 
-// Payment method selection
+// Pemilihan metode pembayaran
 document.querySelectorAll('.payment-option').forEach(option => {
   option.addEventListener('click', function() {
     document.querySelectorAll('.payment-option').forEach(opt => {
@@ -80,11 +80,11 @@ document.querySelectorAll('.payment-option').forEach(option => {
   });
 });
 
-// Handle Pay Button Click
+// Saat tombol Bayar diklik
 document.getElementById('payButton')?.addEventListener('click', function(e) {
   e.preventDefault();
   
-  // Get form values
+  // Ambil nilai dari form
   const product = document.getElementById('product').value.trim();
   const quantity = document.getElementById('quantity').value;
   const name = document.getElementById('name').value.trim();
@@ -94,11 +94,11 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
   const paymentRadio = document.querySelector('input[name="payment"]:checked');
   const payment = paymentRadio ? paymentRadio.value : 'virtual-account';
   
-  // Validation flags
+  // Penanda validasi
   let isValid = true;
   let errors = [];
   
-  // Validate product
+  // Validasi produk
   if (!product) {
     showError('product');
     errors.push('Nama produk harus diisi');
@@ -107,7 +107,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('product');
   }
   
-  // Validate quantity
+  // Validasi jumlah
   if (!quantity || quantity < 1) {
     showError('quantity');
     errors.push('Jumlah order minimal 1');
@@ -116,7 +116,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('quantity');
   }
   
-  // Validate name
+  // Validasi nama
   if (!name || name.length > 15) {
     showError('name');
     errors.push('Nama harus diisi dan maksimal 15 karakter');
@@ -125,7 +125,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('name');
   }
   
-  // Validate email
+  // Validasi email
   if (!validateEmail(email)) {
     showError('email');
     errors.push('Email harus valid');
@@ -134,7 +134,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('email');
   }
   
-  // Validate password
+  // Validasi password
   if (!validatePassword(password)) {
     showError('password');
     errors.push('Password harus 12 karakter dengan kombinasi huruf dan angka');
@@ -143,7 +143,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('password');
   }
   
-  // Validate phone
+  // Validasi nomor HP
   if (!validatePhone(phone)) {
     showError('phone');
     errors.push('No HP harus 13 digit angka dimulai dengan 628');
@@ -152,12 +152,12 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
     hideError('phone');
   }
   
-  // If all valid, redirect to success page WITHOUT alert
+  // Jika semua valid, pindah ke halaman sukses TANPA alert
   if (isValid) {
-    // Get total from button text
+    // Ambil total harga dari teks tombol
     const totalText = this.textContent.split('|')[1].trim().replace('Rp', '').trim();
     
-    // Create URL parameters
+    // Buat parameter URL
     const params = new URLSearchParams({
       product: product,
       quantity: quantity,
@@ -168,13 +168,13 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
       total: totalText
     });
     
-    // LANGSUNG redirect tanpa alert
+    // Langsung redirect
     window.location.href = `/checkout/success?${params.toString()}`;
   } else {
-    // Show errors
+    // Tampilkan error di console
     console.log('Validation errors:', errors);
     
-    // Scroll to first error
+    // Scroll ke error pertama
     const firstError = document.querySelector('.form-group.error');
     if (firstError) {
       firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -182,7 +182,7 @@ document.getElementById('payButton')?.addEventListener('click', function(e) {
   }
 });
 
-// Copy functionality for success page
+// Fungsi salin teks di halaman sukses
 function copyToClipboard(text, buttonId) {
   navigator.clipboard.writeText(text).then(() => {
     const button = document.getElementById(buttonId);
@@ -197,7 +197,7 @@ function copyToClipboard(text, buttonId) {
       }, 2000);
     }
   }).catch(err => {
-    console.error('Failed to copy:', err);
+    console.error('Gagal menyalin:', err);
     alert('Gagal menyalin. Silakan copy manual.');
   });
 }
