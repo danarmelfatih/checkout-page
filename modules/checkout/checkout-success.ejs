@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pembayaran - Invoice <%= order.invoiceNumber %></title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <style>
+      .success-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+
+      .success-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+      }
+
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 48px;
+        color: #10b981;
+      }
+
+      .success-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+      }
+
+      .success-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 16px;
+      }
+
+      .success-body {
+        background: white;
+        padding: 30px;
+        border: 1px solid #e5e7eb;
+        border-top: none;
+      }
+
+      .info-section {
+        margin-bottom: 30px;
+      }
+
+      .info-section h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .info-section h2::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: #667eea;
+        border-radius: 2px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .info-value {
+        color: #1f2937;
+        font-weight: 600;
+        font-size: 14px;
+        text-align: right;
+      }
+
+      .payment-box {
+        background: #f9fafb;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .payment-account {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+
+      .account-info {
+        flex: 1;
+      }
+
+      .bank-name {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 5px;
+      }
+
+      .account-number {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1f2937;
+        letter-spacing: 1px;
+      }
+
+      .copy-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s;
+      }
+
+      .copy-btn:hover {
+        background: #5568d3;
+      }
+
+      .amount-box {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .amount-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 5px;
+      }
+
+      .amount-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #dc2626;
+      }
+
+      .deadline-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+
+      .deadline-warning strong {
+        color: #92400e;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .deadline-time {
+        color: #dc2626;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .product-info {
+        background: #f9fafb;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .confirm-btn {
+        display: block;
+        width: 100%;
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .confirm-btn:hover {
+        background: #059669;
+      }
+
+      .footer-note {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .qris-section {
+        text-align: center;
+        padding: 20px;
+      }
+
+      .qris-code {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 15px 0;
+      }
+
+      .qris-placeholder {
+        width: 200px;
+        height: 200px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #6b7280;
+        flex-direction: column;
+      }
+
+      @media (max-width: 768px) {
+        .success-container {
+          margin: 20px;
+          padding: 0;
+        }
+
+        .success-header h1 {
+          font-size: 22px;
+        }
+
+        .account-number {
+          font-size: 16px;
+        }
+
+        .amount-value {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="success-container">
+      <!-- Header -->
+      <div class="success-header">
+        <div class="success-icon">&#10003;</div>
+        <h1>Pesanan Berhasil Dibuat!</h1>
+        <p>Silakan lanjutkan pembayaran untuk menyelesaikan pesanan Anda</p>
+      </div>
+
+      <!-- Body -->
+      <div class="success-body">
+        <!-- Invoice Info -->
+        <div class="info-section">
+          <h2>Informasi Pesanan</h2>
+          <div class="info-row">
+            <span class="info-label">Nomor Invoice</span>
+            <span class="info-value"><%= order.invoiceNumber %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Nama Pemesan</span>
+            <span class="info-value"><%= order.customerName %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value"><%= order.customerEmail %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">No. HP</span>
+            <span class="info-value"><%= order.customerPhone %></span>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="info-section">
+          <h2>Detail Produk</h2>
+          <div class="product-info">
+            <div class="info-row">
+              <span class="info-label">Produk</span>
+              <span class="info-value"><%= order.productName %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Jumlah</span>
+              <span class="info-value"><%= order.quantity %> item</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Total Pembayaran</span>
+              <span class="info-value" style="color: #dc2626; font-size: 18px;">
+                Rp <%= order.totalAmount %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Instructions -->
+        <div class="info-section">
+          <h2>Informasi Pembayaran</h2>
+          
+          <% if (order.paymentMethod === 'virtual-account' || order.paymentMethod === 'transfer-bank') { %>
+            <div class="payment-box">
+              <div class="payment-account">
+                <div class="account-info">
+                  <div class="bank-name"><%= order.bankName %></div>
+                  <div class="account-number"><%= order.accountNumber %></div>
+                </div>
+                <button class="copy-btn" id="copyAccountBtn" onclick="copyToClipboard('<%= order.accountNumber %>', 'copyAccountBtn')">
+                  Salin
+                </button>
+              </div>
+              
+              <div class="amount-box">
+                <div class="amount-label">Jumlah yang harus dibayar</div>
+                <div class="amount-value">Rp <%= order.totalAmount %></div>
+                <button class="copy-btn" id="copyAmountBtn" style="margin-top: 10px; width: auto;" onclick="copyToClipboard('<%= order.totalAmount.replace(/\./g, '') %>', 'copyAmountBtn')">
+                  Salin Nominal
+                </button>
+              </div>
+            </div>
+          <% } else if (order.paymentMethod === 'qris') { %>
+            <div class="payment-box">
+              <div class="qris-section">
+                <p style="margin: 0 0 10px 0;">Scan kode QR di bawah ini untuk melakukan pembayaran</p>
+                <div class="qris-code">
+                  <div class="qris-placeholder">
+                    <div style="font-size: 48px; margin-bottom: 10px;">&#9744;</div>
+                    <div>[QR Code]</div>
+                    <div style="font-size: 12px; margin-top: 5px;"><%= order.qrisCode %></div>
+                  </div>
+                </div>
+                <div class="amount-box" style="margin-top: 20px;">
+                  <div class="amount-label">Total Pembayaran</div>
+                  <div class="amount-value">Rp <%= order.totalAmount %></div>
+                </div>
+              </div>
+            </div>
+          <% } else if (order.paymentMethod === 'cash-on-delivery') { %>
+            <div class="payment-box">
+              <div style="text-align: center; padding: 20px;">
+                <p style="font-size: 16px; color: #1f2937; margin: 0;">
+                  <strong>Pembayaran akan dilakukan saat barang diterima</strong>
+                </p>
+                <p style="font-size: 14px; color: #6b7280; margin: 10px 0 0 0;">
+                  Siapkan uang pas sejumlah <strong style="color: #dc2626;">Rp <%= order.totalAmount %></strong>
+                </p>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Deadline Warning -->
+        <% if (order.paymentMethod !== 'cash-on-delivery') { %>
+          <div class="deadline-warning">
+            <strong>&#9200; Batas Waktu Pembayaran</strong>
+            <p style="margin: 5px 0 0 0;">
+              Selesaikan pembayaran sebelum: 
+              <span class="deadline-time"><%= order.paymentDeadline %></span>
+            </p>
+          </div>
+        <% } %>
+
+        <!-- Confirm Button -->
+        <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konfirmasi%20pembayaran%20untuk%20Invoice%20<%= order.invoiceNumber %>" 
+           target="_blank" 
+           class="confirm-btn">
+          &#128241; Konfirmasi Pembayaran via WhatsApp
+        </a>
+
+        <!-- Footer Note -->
+        <div class="footer-note">
+          <p>
+            Setelah melakukan pembayaran, silakan klik tombol di atas untuk konfirmasi.<br>
+            Tim kami akan memverifikasi pembayaran Anda dalam 1x24 jam.
+          </p>
+          <p style="margin-top: 15px;">
+            <a href="/checkout" style="color: #667eea; text-decoration: none;">&larr; Kembali ke Checkout</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="/assets/js/script.js"></script>
+  </body>
+</html>

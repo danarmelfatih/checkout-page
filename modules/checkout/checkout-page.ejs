@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout Page</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body>
+    <div class="checkout-container">
+      <div class="left-column">
+        <form id="checkoutForm" novalidate action="/checkout/payment" method="POST">
+          <div class="user-info-form">
+            <h3 class="section-title">Produk</h3>
+            <div class="form-group" data-field="product">
+              <input
+                type="text"
+                id="product"
+                name="product"
+                placeholder="Nama Produk"
+                required
+              />
+              <span class="error-message">Nama produk harus diisi</span>
+            </div>
+
+            <h3 class="section-title">Jumlah Order</h3>
+            <div class="form-group" data-field="quantity">
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value="1"
+                min="1"
+                required
+              />
+              <span class="error-message">Jumlah order minimal 1</span>
+            </div>
+
+            <h3 class="section-title">Nama*</h3>
+            <div class="form-group" data-field="name">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Nama"
+                maxlength="15"
+                required
+              />
+              <span class="char-count"><span id="nameCount">0</span>/15</span>
+              <span class="error-message"
+                >Nama harus diisi dan maksimal 15 karakter</span
+              >
+            </div>
+
+            <h3 class="section-title">Email*</h3>
+            <div class="form-group" data-field="email">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="email@email.com"
+                required
+              />
+              <small>*Fill in with an active email</small>
+              <span class="error-message"
+                >Email harus valid (contoh: nama@email.com)</span
+              >
+            </div>
+
+            <h3 class="section-title">
+              Password (12 karakter, huruf & angka) *
+            </h3>
+            <div class="form-group" data-field="password">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Password"
+                required
+              />
+              <span class="char-count"
+                ><span id="passwordCount">0</span>/12</span
+              >
+              <small
+                >*Fill in the password that will be used as your login.</small
+              >
+              <span class="error-message"
+                >Password harus 12 karakter dengan kombinasi huruf dan
+                angka</span
+              >
+            </div>
+
+            <h3 class="section-title">No HP*</h3>
+            <div class="form-group" data-field="phone">
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="628xxx"
+                maxlength="13"
+                required
+              />
+              <span class="char-count"><span id="phoneCount">0</span>/13</span>
+              <small
+                >*This number has nothing to do with the number that will be
+                automated, fill in your most active number for payment reminders
+                or important announcements</small
+              >
+              <span class="error-message"
+                >No HP harus 13 digit angka (contoh: 6281234567890)</span
+              >
+            </div>
+          </div>
+
+          <div class="promo-box">
+            <h2>
+              <svg width="20" height="20" fill="currentColor">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+                />
+              </svg>
+              Kode Promo
+            </h2>
+            <div class="promo-input">
+              <input
+                type="text"
+                id="promoCode"
+                placeholder="Enter promo code"
+              />
+              <button type="button" class="apply-btn">Apply</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="right-column">
+        <div class="summary-box">
+          <h2>
+            <svg width="20" height="20" fill="currentColor">
+              <path
+                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+              />
+            </svg>
+            Rincian
+          </h2>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>Rp 60.000</span>
+          </div>
+          <div class="summary-row">
+            <span>Diskon</span>
+            <span>-Rp 52.000</span>
+          </div>
+          <div class="summary-row">
+            <span>Pengiriman</span>
+            <span>Rp 88.000</span>
+          </div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span>Rp 77.000</span>
+          </div>
+        </div>
+
+        <div class="payment-methods-card">
+          <h2>
+            <svg width="20" height="20" fill="currentColor">
+              <path
+                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+              />
+            </svg>
+            Metode Pembayaran
+          </h2>
+
+          <div class="payment-option">
+            <input
+              type="radio"
+              id="transfer-bank"
+              name="payment"
+              value="transfer-bank"
+            />
+            <label for="transfer-bank">Transfer Bank</label>
+            <span class="icon paypal">TF</span>
+          </div>
+
+          <div class="payment-option selected">
+            <input
+              type="radio"
+              id="virtual-account"
+              name="payment"
+              value="virtual-account"
+              checked
+            />
+            <label for="virtual-account">Virtual Account</label>
+            <div class="card-icons">
+              <span class="visa">BRI</span>
+              <span class="mastercard">BCA</span>
+              <span class="amex">MANDIRI</span>
+              <span class="amex">BNI</span>
+              <span class="more">+4</span>
+            </div>
+          </div>
+
+          <div class="payment-option">
+            <input type="radio" id="qris" name="payment" value="qris" />
+            <label for="qris">QRIS</label>
+            <span class="icon afterpay">Q</span>
+          </div>
+
+          <div class="payment-option">
+            <input
+              type="radio"
+              id="cash-on-delivery"
+              name="payment"
+              value="cash-on-delivery"
+            />
+            <label for="cash-on-delivery">Cash on Delivery</label>
+            <span class="icon cod">C</span>
+          </div>
+        </div>
+
+        <div class="save-info">
+          <input type="checkbox" id="save-info" checked />
+          <label for="save-info"
+            >Save my information for a faster checkout</label
+          >
+        </div>
+
+        <button type="button" class="pay-button" id="payButton">
+          Bayar | Rp 107.002
+        </button>
+      </div>
+    </div>
+
+    <script src="/assets/js/script.js"></script>
+  </body>
+</html>
