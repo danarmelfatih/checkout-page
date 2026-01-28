@@ -5,3 +5,6 @@ exports.getProduct = async (req, res) => {
   res.status(dt.code).json(dt);
 };
 
+
+//function tes(){
+//}

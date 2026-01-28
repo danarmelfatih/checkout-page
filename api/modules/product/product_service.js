@@ -1,6 +1,5 @@
 const mysql = require("mysql");
 
-// BUAT POOL (INI YANG TADI HILANG)
 const pool = mysql.createPool({
     connectionLimit: 10,
     host: "127.0.0.1",
@@ -19,12 +18,12 @@ exports.get_product = (req, res) => {
 
         const query = `SELECT * FROM product WHERE ${where}`;
 
-        console.log('Query:', query, 'Param:', slug); // Debug log
+        console.log('Query:', query, 'Param:', slug);
 
         pool.query(query, [slug], (err, rows) => {
             if (err) {
-                console.error('Database Error:', err.message); // Error log
-                return resolve({ // Ubah reject jadi resolve
+                console.error('Database Error:', err.message);
+                return resolve({
                     code: 500,
                     status: "error",
                     message: err.message,
@@ -42,7 +41,7 @@ exports.get_product = (req, res) => {
                 code = 200;
             }
 
-            console.log('Result:', JSON.stringify({code, status, msg, dataLength: rows.length})); // Debug log
+            console.log('Result:', JSON.stringify({code, status, msg, dataLength: rows.length}));
 
             resolve({
                 code: code,
