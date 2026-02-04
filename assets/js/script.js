@@ -30,10 +30,18 @@ function validatePhone(phone) {
   return re.test(phone);
 }
 
-function showError(fieldName) {
+function showError(fieldName, customMessage = null) {
   const formGroup = document.querySelector(`[data-field="${fieldName}"]`);
   if (formGroup) {
     formGroup.classList.add('error');
+    
+    // Jika ada custom message, tampilkan
+    if (customMessage) {
+      const errorMsg = formGroup.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.textContent = customMessage;
+      }
+    }
   }
 }
 
@@ -61,11 +69,70 @@ document.getElementById('password')?.addEventListener('blur', function(e) {
   }
 });
 
-document.getElementById('phone')?.addEventListener('blur', function(e) {
-  if (e.target.value && !validatePhone(e.target.value)) {
-    showError('phone');
-  } else {
-    hideError('phone');
+// ✨ VALIDASI NOMOR WHATSAPP DENGAN HIT API
+document.getElementById('phone')?.addEventListener('blur', async function(e) {
+  const phoneValue = e.target.value.trim();
+  
+  // Validasi format dulu
+  if (!phoneValue) {
+    showError('phone', 'No HP harus diisi');
+    return;
+  }
+  
+  if (!validatePhone(phoneValue)) {
+    showError('phone', 'No HP harus 13 digit angka dimulai dengan 628');
+    return;
+  }
+  
+  // Jika format valid, hit API untuk cek validasi WhatsApp
+  try {
+    // Tampilkan loading indicator (optional)
+    const formGroup = document.querySelector(`[data-field="phone"]`);
+    if (formGroup) {
+      formGroup.classList.add('validating');
+    }
+    
+    const response = await fetch('/api/cek_valid', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        no_wa: phoneValue
+      })
+    });
+    
+    const result = await response.json();
+    
+    // Hapus loading indicator
+    if (formGroup) {
+      formGroup.classList.remove('validating');
+    }
+    
+    if (result.status === 'success') {
+      // Nomor valid dan terdaftar di WhatsApp
+      hideError('phone');
+      
+      // Optional: Tampilkan pesan sukses
+      if (formGroup) {
+        formGroup.classList.add('valid');
+      }
+    } else {
+      // Nomor tidak valid atau tidak terdaftar di WhatsApp
+      showError('phone', result.message || 'Nomor tidak terdaftar di WhatsApp');
+    }
+    
+  } catch (error) {
+    console.error('Error validating WhatsApp number:', error);
+    
+    // Hapus loading indicator
+    const formGroup = document.querySelector(`[data-field="phone"]`);
+    if (formGroup) {
+      formGroup.classList.remove('validating');
+    }
+    
+    // Tampilkan error umum
+    showError('phone', 'Gagal memvalidasi nomor WhatsApp. Silakan coba lagi.');
   }
 });
 
