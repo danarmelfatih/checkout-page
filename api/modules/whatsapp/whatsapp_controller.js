@@ -14,3 +14,11 @@ exports.send_wa = async (req, res) => {
   // dt = await service.cek_validasi(dt);
   // res.status(dt.code).json(dt);
 };
+
+//SEND WA
+exports.send_wa = async (req, res) => {
+  dt = await service.capture_payload_send_wa(dt);
+  dt = await service.validasi_payload_send_wa(dt);
+  dt = await service.hit_api_woowa_send_wa(dt);
+  res.status(dt.code).json(dt);
+};

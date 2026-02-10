@@ -21,3 +21,9 @@ hit api wa valid atau tidak
 bun --watch app.js
 file enfirentment
 API checkout
+
+
+
+10/02/2026
+tambahkan kolo, user_role di db
+password dekrip

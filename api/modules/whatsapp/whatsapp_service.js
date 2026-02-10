@@ -8,6 +8,22 @@ exports.caputere_payload = async (dt) => {
   return dt;
 }
 
+exports.validasi_oayload_send_wa = async (dt) => {
+  if (dt.payload.no_wa == '') {
+    dt.message = 'no_wa must be numeric';
+    dt.status = 'failed';
+    dt.code = 400;
+  }
+  if (dt.payload.pesan == '') {
+    dt.message = 'pesan must be numeric';
+    dt.status = 'failed';
+    dt.code = 400;
+  }
+  
+  return dt;
+}
+
+
 exports.validasi_payload_cek_validasi = async (dt) => {
   if (dt.no_wa == ''){
     dt.message = 'no_wa must be numeric';
