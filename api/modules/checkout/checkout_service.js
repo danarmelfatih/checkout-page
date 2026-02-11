@@ -36,6 +36,20 @@ exports.checkout_validasi = async (dt) => {
         return dt;
     }
 
+    if (!dt.payload.email) {
+        dt.code = 400;
+        dt.status = "failed";
+        dt.message = "Email wajib diisi";
+        return dt;
+    }
+
+    if (!dt.payload.no_wa){
+        dt.code = 400;
+        dt.status = "failed";
+        dt.message = "No WhatsApp wajib diisi";
+        return dt;
+    }
+
     return dt;
 };
 
@@ -103,6 +117,52 @@ exports.checkout_create_akun = async (dt) => {
         dt.data.user_id = result.insertId;
     }
 
+    return dt;
+};
+
+//CREATE SEND WA
+exports.checkout_create_send_wa = async (dt) => {
+    if (dt.status === "failed") return dt;
+    
+    const ADMIN_WA_NUMBER = process.env.WA_NUMBER || '6281234567890';
+    
+    dt.payload.pesan = `Halo ${dt.payload.nama}, terima kasih telah melakukan checkout. 
+    
+Produk: ${dt.payload.product}
+Quantity: ${dt.payload.quantity}
+Total: Rp ${dt.payload.total ? dt.payload.total.toLocaleString('id-ID') : 0}
+
+Silahkan lakukan pembayaran sebelum 24 jam setelah pesanan dibuat.
+Setelah melakukan pembayaran, silahkan konfirmasi ke nomor WhatsApp berikut: ${ADMIN_WA_NUMBER}
+
+Terima kasih.`;
+
+    try {
+        const wa = require('../whatsapp/whatsapp_controller');
+        const waResult = await wa.send_wa(dt);
+        
+        console.log('WA Result:', waResult);
+        
+        if (waResult.status === "success") {
+            dt.data.wa_sent = true;
+            dt.data.wa_response = waResult.data.wa_response;
+            dt.message = "Checkout berhasil, notifikasi WhatsApp terkirim";
+        } else {
+            dt.data.wa_sent = false;
+            dt.data.wa_warning = waResult.message;
+            dt.message = "Checkout berhasil, tapi WhatsApp gagal terkirim";
+        }
+        
+    } catch (error) {
+        console.log('Error sending WA:', error.message);
+        dt.data.wa_sent = false;
+        dt.data.wa_warning = 'WhatsApp notification failed: ' + error.message;
+    }
+    
+    // Checkout tetap sukses meskipun WA gagal
+    dt.status = "success";
+    dt.code = 200;
+    
     return dt;
 };
 
