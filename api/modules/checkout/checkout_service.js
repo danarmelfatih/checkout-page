@@ -53,6 +53,131 @@ exports.checkout_validasi = async (dt) => {
     return dt;
 };
 
+//BEGIN TRANSACTION
+exports.checkout_begin_transaction = async (dt) => {
+    if (dt.status === "failed") return dt;
+    
+    try {
+        await query("START TRANSACTION");
+        console.log("Transaction started");
+        dt.data.transaction_started = true;
+        return dt;
+    } catch (error) {
+        console.error("Failed to start transaction:", error);
+        dt.status = "failed";
+        dt.code = 500;
+        dt.message = "Gagal memulai transaksi";
+        return dt;
+    }
+};
+
+//COMMIT TRANSACTION
+exports.checkout_create_commit = async (dt) => {
+    if (dt.status === "failed") {
+        try {
+            await query("ROLLBACK");
+            console.log("Transaction rolled back");
+        } catch (error) {
+            console.error("Failed to rollback:", error);
+        }
+        return dt;
+    }
+    
+    try {
+        await query("COMMIT");
+        console.log("Transaction committed");
+        dt.data.transaction_committed = true;
+        return dt;
+    } catch (error) {
+        console.error("Failed to commit transaction:", error);
+        try {
+            await query("ROLLBACK");
+        } catch (rollbackError) {
+            console.error("Failed to rollback:", rollbackError);
+        }
+        dt.status = "failed";
+        dt.code = 500;
+        dt.message = "Gagal menyimpan transaksi";
+        return dt;
+    }
+};
+
+//CREATE ORDER
+exports.checkout_create_order = async (dt) => {
+    if (dt.status === "failed") return dt;
+    
+    try {
+        const total = parseInt(dt.payload.harga) * parseInt(dt.payload.quantity);
+        dt.payload.total = total;
+        
+        const result = await query(
+            `INSERT INTO \`order\` (user_id, total, payment_method, status) 
+             VALUES (?, ?, ?, ?)`,
+            [
+                dt.data.user_id,
+                dt.payload.total,
+                dt.payload.payment,
+                'pending'
+            ]
+        );
+        
+        dt.data.order_id = result.insertId;
+        console.log("Order created with ID:", dt.data.order_id);
+        
+        return dt;
+    } catch (error) {
+        console.error("Failed to create order:", error);
+        dt.status = "failed";
+        dt.code = 500;
+        dt.message = "Gagal membuat order: " + error.message;
+        return dt;
+    }
+};
+
+//CREATE ORDER ITEM
+exports.checkout_create_order_item = async (dt) => {
+    if (dt.status === "failed") return dt;
+    
+    try {
+        const products = await query(
+            "SELECT id FROM product WHERE name = ?",
+            [dt.payload.product]
+        );
+        
+        if (products.length === 0) {
+            dt.status = "failed";
+            dt.code = 404;
+            dt.message = "Product tidak ditemukan";
+            return dt;
+        }
+        
+        const product_id = products[0].id;
+        const subtotal = dt.payload.harga * dt.payload.quantity;
+        
+        const result = await query(
+            `INSERT INTO order_item (order_id, product_id, quantity, subtotal) 
+             VALUES (?, ?, ?, ?)`,
+            [
+                dt.data.order_id,
+                product_id,
+                dt.payload.quantity,
+                subtotal
+            ]
+        );
+        
+        dt.data.order_item_id = result.insertId;
+        console.log("Order item created with ID:", dt.data.order_item_id);
+        
+        return dt;
+    } catch (error) {
+        console.error("Failed to create order item:", error);
+        dt.status = "failed";
+        dt.code = 500;
+        dt.message = "Gagal membuat order item: " + error.message;
+        return dt;
+    }
+};
+
 // AMBIL HARGA PRODUCT
 exports.checkout_get_harga = async (dt) => {
     if (dt.status === "failed") return dt;
