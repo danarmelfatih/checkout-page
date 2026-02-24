@@ -1,82 +1,60 @@
-const mysql = require("mysql");
+// api/modules/upsell/upsell_service.js
+// Migrated from MySQL to PostgreSQL
 
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: "127.0.0.1",
-    user: "root",
-    password: "",
-    database: "tampilan-checkout",
-    port: 3307
-});
+const { query } = require("../../config/db");
 
-// Get upsell products berdasarkan product ID atau slug
-exports.get_upsell = (req, res) => {
-    return new Promise((resolve, reject) => {
-        let slug = req.params.slug_or_id;
+exports.get_upsell = async (req, res) => {
+    try {
+        const slug  = req.params.slug_or_id;
+        const where = isNaN(slug) ? "slug = ?" : "id = ?";
 
-        // Cari product utama dulu
-        let where = isNaN(slug) ? "slug = ?" : "id = ?";
-        const queryMain = `SELECT * FROM product WHERE ${where}`;
+        // Cari produk utama
+        const mainProduct = await query(
+            `SELECT * FROM product WHERE ${where}`,
+            [slug]
+        );
 
-        pool.query(queryMain, [slug], (err, mainProduct) => {
-            if (err) {
-                console.error('Database Error:', err.message);
-                return resolve({
-                    code: 500,
-                    status: "error",
-                    message: err.message,
-                    data: null
-                });
-            }
+        if (mainProduct.length === 0) {
+            return { code: 404, status: "failed", message: "Product Not Found", data: null };
+        }
 
-            if (mainProduct.length === 0) {
-                return resolve({
-                    code: 404,
-                    status: "failed",
-                    message: "Product Not Found",
-                    data: null
-                });
-            }
+        const upsellIds = mainProduct[0].upsell;
 
-            // Ambil upsell IDs dari kolom upsell (format: "2,3,4")
-            const upsellIds = mainProduct[0].upsell;
+        if (!upsellIds || upsellIds.trim() === '') {
+            return {
+                code: 200, status: "success", message: "No Upsell Products",
+                data: { main_product: mainProduct[0], upsell_products: [] }
+            };
+        }
 
-            if (!upsellIds || upsellIds.trim() === '') {
-                return resolve({
-                    code: 200,
-                    status: "success",
-                    message: "No Upsell Products",
-                    data: {
-                        main_product: mainProduct[0],
-                        upsell_products: []
-                    }
-                });
-            }
+        // PostgreSQL: ANY(ARRAY[...]) untuk query IN dengan array dinamis
+        // Kita parse manual karena format kolom adalah "1,2,3"
+        const idArray = upsellIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
 
-            // Query upsell products
-            const queryUpsell = `SELECT * FROM product WHERE id IN (${upsellIds})`;
+        if (idArray.length === 0) {
+            return {
+                code: 200, status: "success", message: "No Upsell Products",
+                data: { main_product: mainProduct[0], upsell_products: [] }
+            };
+        }
 
-            pool.query(queryUpsell, (err, upsellProducts) => {
-                if (err) {
-                    console.error('Database Error:', err.message);
-                    return resolve({
-                        code: 500,
-                        status: "error",
-                        message: err.message,
-                        data: null
-                    });
-                }
+        // PostgreSQL IN clause dengan parameterized query
+        const placeholders = idArray.map((_, i) => `$${i + 1}`).join(',');
+        const { Pool } = require('pg');
+        // Gunakan pool dari config db
+        const dbConfig = require('../../config/db');
+        const upsellProducts = await dbConfig.pool.query(
+            `SELECT * FROM product WHERE id IN (${placeholders})`,
+            idArray
+        ).then(r => r.rows);
 
-                resolve({
-                    code: 200,
-                    status: "success",
-                    message: "Upsell Products Found",
-                    data: {
-                        main_product: mainProduct[0],
-                        upsell_products: upsellProducts
-                    }
-                });
-            });
-        });
-    });
+        return {
+            code: 200, status: "success", message: "Upsell Products Found",
+            data: { main_product: mainProduct[0], upsell_products: upsellProducts }
+        };
+
+    } catch (err) {
+        console.error('Database Error:', err.message);
+        return { code: 500, status: "error", message: err.message, data: null };
+    }
 };

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+
+    <% if (success) { %>
+        <div style="color:green"><%= success %></div>
+    <% } %>
+    <% if (error) { %>
+        <div style="color:red"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/auth/login">
+        <input type="hidden" name="redirect" value="<%= redirect %>">
+
+        <label>Username / No WhatsApp / Email</label><br>
+        <input type="text" name="identifier" required><br><br>
+
+        <label>Password</label><br>
+        <input type="password" name="password" required><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <br>
+    <p>Belum punya akun? <a href="/auth/register?redirect=<%= redirect %>">Daftar di sini</a></p>
+</body>
+</html>
