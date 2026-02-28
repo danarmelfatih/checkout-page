@@ -33,3 +33,25 @@
     bikin table order dan order_item > id order_id product_id quantity subtotal
 
     pr bikin tampilan login logut, api login logout dan cookie
+
+
+    24/02/2026
+    moota.co
+    beli hositng
+
+
+
+tambahan
+dt.diskon
+email pakai nodemailer
+
+
+
+25/02/2026
+tbl queue
+id
+order_id
+type 'wa','email'
+destination
+pesan
+status 'pending','succes', 'failed'

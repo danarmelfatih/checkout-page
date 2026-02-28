@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="/assets/css/style.css" />
   </head>
   <body>
+
+    <!-- TAMBAH INI -->
+    <div style="text-align: right; padding: 10px 20px; background: #f5f5f5;">
+      <span>Halo, <strong><%= user.nama %></strong></span>
+      &nbsp;|&nbsp;
+      <a href="/auth/logout" style="color: red;">Logout</a>
+    </div>
+    
     <div class="checkout-container">
       <div class="left-column">
         <form id="checkoutForm" novalidate action="/checkout/payment" method="POST">

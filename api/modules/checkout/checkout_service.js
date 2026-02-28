@@ -1,7 +1,5 @@
-// api/modules/checkout/checkout_service.js
-// Migrated from MySQL to PostgreSQL
-
-const { query, queryInsert, pool } = require("../../config/db");
+    const { query, queryInsert, pool } = require("../../config/db");
+const nodemailer = require("nodemailer");
 
 // ─── CAPTURE PAYLOAD ──────────────────────────────────────────────────────────
 exports.capture_payload = async (body) => {
@@ -215,7 +213,7 @@ exports.checkout_create_commit = async (dt) => {
 exports.checkout_create_send_wa = async (dt) => {
     if (dt.status === "failed") return dt;
 
-    const ADMIN_WA_NUMBER = process.env.WA_NUMBER || '6281234567890';
+    const ADMIN_WA_NUMBER = process.env.WA_NUMBER || '6287727747526';
 
     dt.payload.pesan = `Halo ${dt.payload.nama}, terima kasih telah melakukan checkout.
 
@@ -231,7 +229,7 @@ Terima kasih.`;
     try {
         const wa = require('../whatsapp/whatsapp_controller');
         const waResult = await wa.send_wa(dt);
-        if (waResult.status === "success") {
+        if (waResult && waResult.status === "success") {
             dt.data.wa_sent      = true;
             dt.data.wa_response  = waResult.data?.wa_response;
             dt.message           = "Checkout berhasil, notifikasi WhatsApp terkirim";
@@ -278,4 +276,146 @@ exports.checkout_create_akun = async (dt) => {
     );
     dt.data.user_id = result.insertId;
     return dt;
+};
+
+// ─── CREATE INVOICE ───────────────────────────────────────────────────────────
+exports.checkout_create_invoice = async (dt) => {
+    if (dt.status === "failed") return dt; // ← tambah guard
+    try {
+        const now = new Date();
+        const YY  = String(now.getFullYear()).slice(-2);
+        const MM  = String(now.getMonth() + 1).padStart(2, '0');
+        const DD  = String(now.getDate()).padStart(2, '0');
+        const H   = String(now.getHours()).padStart(2, '0');
+        const I   = String(now.getMinutes()).padStart(2, '0');
+        const no_invoice = `INV-${YY}${MM}${DD}${H}${I}`;
+
+        const max_hari    = 3;
+        const jatuh_tempo = new Date(now.getTime() + max_hari * 24 * 60 * 60 * 1000);
+
+        // fix: pakai txQuery + dt.data._client, bukan dt.con.query
+        const client = dt.data._client;
+        const result = await txQuery(
+            client,
+            `INSERT INTO tagihan (order_id, pelanggan_id, no_invoice, created_at, jatuh_tempo, subtotal, kode_unik, diskon, total)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+            [
+                dt.data.order_id,
+                dt.data.user_id,
+                no_invoice,
+                now,
+                jatuh_tempo,
+                dt.data.subtotal  ?? dt.payload.total,
+                dt.data.kode_unik ?? 0,
+                dt.data.diskon    ?? 0,
+                dt.data.total     ?? dt.payload.total
+            ]
+        );
+
+        dt.data.invoice_id = result[0].id;
+        dt.data.no_invoice = no_invoice;
+        dt.data.jatuh_tempo = jatuh_tempo.toLocaleDateString('id-ID', {
+            day: '2-digit', month: 'long', year: 'numeric'
+        });
+        console.log("Invoice created:", no_invoice, "| ID:", dt.data.invoice_id);
+        return dt;
+
+    } catch (error) {
+        console.error("Failed to create invoice:", error);
+        dt.status  = "failed";
+        dt.code    = 500;
+        dt.message = "Gagal membuat invoice: " + error.message;
+        return dt;
+    }
+};
+
+
+// ─── SEND EMAIL ───────────────────────────────────────────────────────────────
+exports.checkout_create_send_email = async (dt) => {
+    if (dt.status === "failed") return dt;
+
+    try {
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.EMAIL_SENDER,
+                pass: process.env.GMAIL_APP_PASSWORD
+            }
+        });
+
+        await transporter.sendMail({
+            from: `"Billing-Checkout" <${process.env.GMAIL_SENDER}>`,
+            to: dt.payload.email,
+            subject: "Checkout Berhasil",
+            html: `
+                <h2>Halo ${dt.payload.nama}</h2>
+                <p>Terima kasih telah melakukan checkout.</p>
+
+                <p><b>Produk:</b> ${dt.payload.product}</p>
+                <p><b>Quantity:</b> ${dt.payload.quantity}</p>
+                <p><b>Total:</b> Rp ${dt.payload.total?.toLocaleString('id-ID')}</p>
+
+                <br/>
+                <p>Silakan lakukan pembayaran sebelum 24 jam.</p>
+                <p>Terima kasih 🙏</p>
+            `
+        });
+
+        dt.data.email_sent = true;
+        console.log("Email sent successfully");
+
+    } catch (error) {
+        dt.data.email_sent = false;
+        dt.data.email_error = error.message;
+        console.log("Email failed:", error.message);
+    }
+
+    return dt;
+};
+
+
+// ─── ADD QUEUE ────────────────────────────────────────────────────────────────
+exports.checkout_add_queue = async (dt) => {
+    if (dt.status === "failed") return dt;
+    try {
+        const client = dt.data._client;
+        const p = dt.payload;
+
+        const pesanEmail = `Halo ${p.nama}, terima kasih telah melakukan checkout.\n\n` +
+            `Produk: ${p.product}\nQuantity: ${p.quantity}\n` +
+            `Total: Rp ${Number(p.total).toLocaleString('id-ID')}\n` +
+            `No. Invoice: ${dt.data.no_invoice || '-'}\n` +
+            `Jatuh Tempo: ${dt.data.jatuh_tempo || '-'}\n\n` +
+            `Silakan lakukan pembayaran sebelum jatuh tempo. Terima kasih.`;
+
+        const pesanWa = pesanEmail;
+
+        // insert queue email
+        await txQuery(
+            client,
+            `INSERT INTO queue (order_id, type, destination, pesan, status)
+             VALUES (?, 'email', ?, ?, 'pending')`,
+            [dt.data.order_id, p.email, pesanEmail]
+        );
+
+        // insert queue wa
+        await txQuery(
+            client,
+            `INSERT INTO queue (order_id, type, destination, pesan, status)
+             VALUES (?, 'wa', ?, ?, 'pending')`,
+            [dt.data.order_id, p.no_wa, pesanWa]
+        );
+
+        dt.data.queue_added = true;
+        console.log("Queue email & WA added for order:", dt.data.order_id);
+        return dt;
+
+    } catch (error) {
+        dt.data.queue_added   = false;
+        dt.data.queue_warning = "Gagal menambah queue: " + error.message;
+        console.error("Failed to add queue:", error);
+        return dt;
+    }
 };

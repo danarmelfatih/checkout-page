@@ -25,4 +25,8 @@ app.use("/", routes);
 // Start Server
 app.listen(4000, "127.0.0.1", () => {
     console.log("Server running at http://127.0.0.1:4000");
-});
+}); 
+
+// ─── Start Worker ─────────────────────────────────────────────────────────────
+const { startWorker } = require("./modules/queue/queue_worker");
+startWorker();
