@@ -2,41 +2,128 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Akun</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #5b60df;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 0;
+        }
+
+        .card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: border 0.2s;
+            outline: none;
+        }
+
+        input:focus { border-color: #4f46e5; }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button[type="submit"]:hover { background: #4338ca; }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .footer-text a { color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .footer-text a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <h2>Buat Akun Baru</h2>
+    <div class="card">
+        <h2>Buat Akun Baru</h2>
 
-    <% if (error) { %>
-        <div style="color:red"><%= error %></div>
-    <% } %>
+        <% if (error) { %>
+            <div class="alert-error"><%= error %></div>
+        <% } %>
 
-    <form method="POST" action="/auth/register">
-        <input type="hidden" name="redirect" value="<%= redirect %>">
+        <form method="POST" action="/auth/register">
+            <input type="hidden" name="redirect" value="<%= redirect %>">
 
-        <label>Nama Lengkap</label><br>
-        <input type="text" name="nama" required><br><br>
+            <label>Nama Lengkap</label>
+            <input type="text" name="nama" required>
 
-        <label>No WhatsApp</label><br>
-        <input type="text" name="no_wa" placeholder="628xxx" required><br><br>
+            <label>No WhatsApp</label>
+            <input type="text" name="no_wa" placeholder="628xxx" required>
 
-        <label>Email</label><br>
-        <input type="email" name="email" required><br><br>
+            <label>Email</label>
+            <input type="email" name="email" required>
 
-        <label>Username (opsional)</label><br>
-        <input type="text" name="username"><br><br>
+            <label>Username (opsional)</label>
+            <input type="text" name="username">
 
-        <label>Password</label><br>
-        <input type="password" name="password" required><br><br>
+            <label>Password</label>
+            <input type="password" name="password" required>
 
-        <label>Konfirmasi Password</label><br>
-        <input type="password" name="confirm_password" required><br><br>
+            <label>Konfirmasi Password</label>
+            <input type="password" name="confirm_password" required>
 
-        <button type="submit">Daftar</button>
-    </form>
+            <button type="submit">Daftar</button>
+        </form>
 
-    <br>
-    <p>Sudah punya akun? <a href="/auth/login?redirect=<%= redirect %>">Login di sini</a></p>
+        <p class="footer-text">Sudah punya akun? <a href="/auth/login?redirect=<%= redirect %>">Login di sini</a></p>
+    </div>
 </body>
 </html>
-    

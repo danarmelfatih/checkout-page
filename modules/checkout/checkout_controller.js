@@ -1,7 +1,13 @@
 const path = require("path");
 
 exports.index = (req, res) => {
-  res.render("checkout/checkout-page");
+  res.render("checkout/checkout-page", {
+    user: {
+      nama:  req.session?.nama  || '',
+      email: req.session?.email || '',
+      no_wa: req.session?.no_wa || ''
+    }
+  });
 };
 
 exports.success = (req, res) => {
